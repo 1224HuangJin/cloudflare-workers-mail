@@ -8,14 +8,14 @@ export default {
 
     let cleanContent = rawBody;
     // 健壮的正文提取逻辑：优先寻找 HTML，其次寻找纯文本  - By 1224HuangJin
-    if (rawBody.includes("Content-Type: text/html")) {
-      const parts = rawBody.split("Content-Type: text/html");
-      cleanContent = parts.length > 1 ? parts[parts.length - 1].split("--") : rawBody;
-    } else if (rawBody.includes("Content-Type: text/plain")) {
-      const parts = rawBody.split("Content-Type: text/plain");
-      cleanContent = parts.length > 1 ? parts[parts.length - 1].split("--") : rawBody;
-    }
-
+if (rawBody.includes("Content-Type: text/html")) {
+    const parts = rawBody.split("Content-Type: text/html");
+    cleanContent = parts.length > 1 ? parts[parts.length - 1].split("--")[0] : rawBody;
+} else if (rawBody.includes("Content-Type: text/plain")) {
+    const parts = rawBody.split("Content-Type: text/plain");
+    // 修复：使用 rawBody 且加上 [0]
+    cleanContent = parts.length > 1 ? parts[parts.length - 1].split("--")[0] : rawBody;
+}
     // 核心乱码清洗：解码 Quoted-printable (如 =3D -> =, =20 -> 空格)  - By 1224HuangJin
     cleanContent = cleanContent
       .replace(/=\r?\n/g, "")
@@ -91,21 +91,23 @@ export default {
     if (url.pathname === "/api/send" && request.method === "POST") {
       try {
         const data = await request.json();
-        const res = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: { "Authorization": `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            from: `${data.senderName || "Admin"} <admin@exemple.com>`,
-            to: data.to.split(','),
-            subject: data.subject,
-            html: data.content,
-            // 重新加入附件逻辑：将前端传来的 Base64 数组映射给 Resend  - By 1224HuangJin
-            attachments: data.attachments?.map(a => ({
-              filename: a.name,
-              content: a.content.split(',') // 移除 Data URL 前缀  - By 1224HuangJin
-            }))
-          }),
-        });
+const res = await fetch("https://api.resend.com/emails", {
+  method: "POST",
+  headers: { 
+    "Authorization": `Bearer ${env.RESEND_API_KEY}`, 
+    "Content-Type": "application/json" 
+  },
+  body: JSON.stringify({ // 必须合并到这里
+    from: `${data.senderName || "Admin"} <admin@exemple>`, // 注意域名拼写
+    to: data.to.split(','),
+    subject: data.subject,
+    html: data.content,
+    attachments: data.attachments?.map(a => ({
+      filename: a.name,
+      content: a.content.includes(',') ? a.content.split(',')[1] : a.content
+    }))
+  })
+});
 
         if (res.ok) {
           if (data.draftId) await env.DB.prepare("DELETE FROM emails WHERE id=?").bind(data.draftId).run();
@@ -131,7 +133,7 @@ export default {
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Cloud Mail - By 1224HuangJin</title>
+    <title>CloudFlare Mail - By 1224HuangJin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
@@ -155,7 +157,7 @@ export default {
             <input type="text" id="searchInput" onkeyup="if(event.key==='Enter') loadEmails()" placeholder="搜索邮件" class="w-full bg-blue-50 px-6 py-2 rounded-full outline-none focus:bg-white border">
         </div>
     </header>
-
+ <!-- © 2026 1224HuangJin. All rights reserved. -->
     <div class="flex flex-1 overflow-hidden">
         <aside class="w-64 pt-4 shrink-0">
             <button onclick="openCompose()" class="flex items-center gap-3 ml-4 mb-6 px-10 py-4 bg-blue-100 hover:bg-blue-200 text-blue-900 rounded-2xl font-bold shadow-sm transition">
@@ -201,6 +203,10 @@ export default {
                 <input id="cFiles" type="file" multiple class="text-xs w-full text-gray-500">
             </div>
         </div>
+        
+    <head>
+    <meta name="copyright" content="© 2026 1224HuangJin. All rights reserved.">
+</head>
         <div class="p-4 border-t bg-gray-50 flex justify-end">
             <button onclick="sendMail()" id="sendBtn" class="bg-blue-600 text-white px-12 py-2 rounded-full font-bold shadow-lg hover:bg-blue-700">发送</button>
         </div>
@@ -317,7 +323,11 @@ export default {
 
         loadEmails();
         setInterval(loadEmails, 20000); 
+        <!-- © 2026 1224HuangJin. All rights reserved. -->
     </script>
+    <footer>
+    <p>&copy; 2026 1224HuangJin. All rights reserved.</p>
+</footer>
 </body>
 </html>`;
   }
