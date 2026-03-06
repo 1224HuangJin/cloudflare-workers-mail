@@ -1,6 +1,6 @@
 # 🚀 项目名称：Cloudflare Workers Mail
 ```
-⚠️ 请您注意，本代码全由AI制作、并某些功能并未实现（我懒得搞了）
+⚠️ 请您注意，本代码全由AI制作、并某些功能并未实现（我懒得搞了，我懒到连这个介绍都是ai生成的、只是我纠正+优化了）
 但最少的发送邮件和接受邮件目前还可以使用。
 ```
 **Cloudflare Workers Mail** 是一款专为个人和开发者设计的轻量级、无服务器（Serverless）邮件处理系统。它运行在 Cloudflare 的边缘网络上，通过 **Cloudflare Email Routing** 接收邮件，并利用 **Resend API** 发送邮件，让您能够通过自己的域名建立一个功能完备的私密邮局。
@@ -29,7 +29,7 @@
     ```
 
 #### 2. 配置 Workers 绑定 (Bindings)
-在 Workers 的 **Settings -> Bindings** 中必须设置以下变量，代码方可运行：
+在 Workers 的 **Bindings(绑定)** 中必须设置以下变量，代码方可运行：
 *   **D1 Database**: 变量名设为 `DB`。
 *   **Environment Variables**:
     *   `SESSION_SECRET`: 您自定义的登录密钥。（自己随便写个就好了）
@@ -39,7 +39,11 @@
 #### 3. 关联域名与发送服务
 *   **Resend 验证**：在 Resend 后台添加并验证您的域名，获取 3 条 DNS 记录并填回 Cloudflare 中，以确保邮件不会被判定为垃圾邮件。
 *   **路由到 Worker**：在 Cloudflare 邮箱路由规则中，将“Catch-all”或特定地址的动作设置为“路由到 Worker (Route to Workers)”，并选择您创建的这个 Worker。
+*  **填入你的域名**: 请务必在 `from: `${data.senderName || "Admin"} <admin@yourdomain.com>`,` 中的 "@yourdomain.com" 改为您真正的已经在Resend绑定的域名，比如说、像这样 `... <admin@1224hj.top>`
+---
 
+### 🔗 用到的链接：
+[https://dash.cloudflare.com/login](https://dash.cloudflare.com/login)
 ---
 
 ### ⚠️ 注意事项
