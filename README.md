@@ -1,6 +1,12 @@
 # 🚀 项目名称：Cloudflare Workers Mail
+
+> [!WARNING]
+> 比起这个项目，我更推荐你使用这个： [https://temp-mail-docs.awsl.uk/zh/](https://temp-mail-docs.awsl.uk/zh/)
+
+
 ```
 ⚠️ 请您注意，本代码全由AI制作、并某些功能并未实现（我懒得搞了，我懒到连这个介绍都是ai生成的、只是我纠正+优化了）
+
 但最少的发送邮件和接受邮件目前还可以使用。
 ```
 **Cloudflare Workers Mail** 是一款专为个人和开发者设计的轻量级、无服务器（Serverless）邮件处理系统。它运行在 Cloudflare 的边缘网络上，通过 **Cloudflare Email Routing** 接收邮件，并利用 **Resend API** 发送邮件，让您能够通过自己的域名建立一个功能完备的私密邮局。
